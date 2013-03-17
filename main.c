@@ -15,12 +15,13 @@ int main(void)
 	getcwd(cwd, sizeof(cwd));
 	mvwprintw(w_path, 1, 2, "%s", cwd);
 
-	struct dirent *entries[1024];
-	read_entries(cwd, entries);	
-	int i;
-	for(i = 0; entries[i] != NULL; i++)
-		mvwprintw(w_folders, i+1, 2, "%s", entries[i]->d_name);
+	struct dirent *files[1024];
+	struct dirent *folders[1024];
+	get_folders_and_files(cwd, folders, files);
 
+	show_folders(w_folders, folders);
+	show_files(w_files, files);
+	
 	wrefresh(w_path);
 	wrefresh(w_folders);
 	wrefresh(w_files);
@@ -33,6 +34,27 @@ int main(void)
 
 	endwin();
 	return 0;
+}
+
+void show_folders(WINDOW *w_folders, struct dirent **folders)
+{
+	int i;
+	for(i = 0; folders[i] != NULL; i++)
+		mvwprintw(w_folders, i+1, 2, "%s", folders[i]->d_name);
+}
+
+void show_files(WINDOW *w_files, struct dirent **files)
+{
+	int i;
+	for(i = 0; files[i] != NULL; i++)
+		mvwprintw(w_files, i+1, 2, "%2d) %s", i, files[i]->d_name);
+}
+
+void get_folders_and_files(char *path, struct dirent **folders, struct dirent **files)
+{
+	struct dirent *entries[1024];
+	read_entries(path, entries);
+	split_entries(entries, folders, files);
 }
 
 void read_entries(char *path, struct dirent **entries)
