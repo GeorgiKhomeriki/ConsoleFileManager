@@ -1,5 +1,7 @@
 #include <ncurses.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <dirent.h>
 
 WINDOW *create_window(int x, int y, int width, int height);
 void destroy_window(WINDOW *win);
@@ -17,10 +19,20 @@ int main(void)
 	
 	char cwd[1024];
 	getcwd(cwd, sizeof(cwd));
-	mvwprintw(w_path, 1, 1, "%s", cwd);
+	mvwprintw(w_path, 1, 2, "%s", cwd);
+	
+	DIR *dir = opendir(cwd);
+	if(dir != NULL) {
+		int i;
+		struct dirent *entry;
+		for(i = 1; entry = readdir(dir); i++)
+			mvwprintw(w_folders, i, 1, "%s", entry->d_name);
+		closedir(dir);
+	}
 
 	wrefresh(w_path);
 	wrefresh(w_folders);
+	wrefresh(w_files);
 	refresh();
 	getch();
 
