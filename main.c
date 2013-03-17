@@ -1,10 +1,4 @@
-#include <ncurses.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <dirent.h>
-
-WINDOW *create_window(int x, int y, int width, int height);
-void destroy_window(WINDOW *win);
+#include "main.h"
 
 int main(void)
 {
@@ -20,15 +14,12 @@ int main(void)
 	char cwd[1024];
 	getcwd(cwd, sizeof(cwd));
 	mvwprintw(w_path, 1, 2, "%s", cwd);
-	
-	DIR *dir = opendir(cwd);
-	if(dir != NULL) {
-		int i;
-		struct dirent *entry;
-		for(i = 1; entry = readdir(dir); i++)
-			mvwprintw(w_folders, i, 1, "%s", entry->d_name);
-		closedir(dir);
-	}
+
+	struct dirent *entries[1024];
+	read_entries(cwd, entries);	
+	int i;
+	for(i = 0; entries[i] != NULL; i++)
+		mvwprintw(w_folders, i+1, 2, "%s", entries[i]->d_name);
 
 	wrefresh(w_path);
 	wrefresh(w_folders);
@@ -44,17 +35,31 @@ int main(void)
 	return 0;
 }
 
-WINDOW *create_window(int x, int y, int width, int height)
+void read_entries(char *path, struct dirent **entries)
 {
-	WINDOW *win = newwin(height, width, y, x);
-	box(win, 0, 0);
-	wrefresh(win);
-	return win;
+	DIR *dir = opendir(path);
+	if(dir != NULL) {
+		int i;
+		struct dirent *entry;
+		for(i = 0; (entry = readdir(dir)) != NULL; i++)
+			entries[i] = entry;
+		closedir(dir);
+	}
 }
 
-void destroy_window(WINDOW *win)
+void split_entries(struct dirent **entries, struct dirent **folders, struct dirent **files)
 {
-	wborder(win, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
-	wrefresh(win);
-	delwin(win);
+	int i, folder_i, file_i;
+	folder_i = file_i = 0;
+	struct dirent *entry;
+	for(i = 0; (entry = entries[i]) != NULL; i++) {
+		if(entry->d_type == DT_DIR) {
+			folders[folder_i] = entry;
+			folder_i++;
+		} else {
+			files[file_i] = entry;
+			file_i++;
+		}
+	}
 }
+
