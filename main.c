@@ -47,7 +47,7 @@ void show_files(WINDOW *w_files, struct dirent **files)
 {
 	int i;
 	for(i = 0; files[i] != NULL; i++)
-		mvwprintw(w_files, i+1, 2, "%2d) %s", i, files[i]->d_name);
+		mvwprintw(w_files, i+1, 2, "%2d) %s [%d]", i, files[i]->d_name, files[i]->d_type);
 }
 
 void get_folders_and_files(char *path, struct dirent **folders, struct dirent **files)
@@ -75,13 +75,12 @@ void split_entries(struct dirent **entries, struct dirent **folders, struct dire
 	folder_i = file_i = 0;
 	struct dirent *entry;
 	for(i = 0; (entry = entries[i]) != NULL; i++) {
-		if(entry->d_type == DT_DIR) {
-			folders[folder_i] = entry;
-			folder_i++;
-		} else {
-			files[file_i] = entry;
-			file_i++;
-		}
+		if(entry->d_type == DT_DIR)
+			folders[folder_i++] = entry;
+		else
+			files[file_i++] = entry;
 	}
+	folders[folder_i] = files[file_i] = NULL; // otherwise non-NULL entries can be in array?
+	mvprintw(0, 0, "%d", file_i);
 }
 
