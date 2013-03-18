@@ -5,6 +5,8 @@ int main(void)
 	initscr();
 	cbreak();
 	noecho();
+	curs_set(0);
+	nodelay(stdscr, TRUE);
 	refresh();
 
 	WINDOW *w_path = create_window(1, 1, COLS - 3, 3);
@@ -15,18 +17,48 @@ int main(void)
 	getcwd(cwd, sizeof(cwd));
 	mvwprintw(w_path, 1, 2, "%s", cwd);
 
-	struct dirent *files[1024];
-	struct dirent *folders[1024];
-	get_folders_and_files(cwd, folders, files);
+	struct dirent *folders[1024], *files[1024];
+	int num_folders, num_files;
+	get_folders_and_files(cwd, folders, files, &num_folders, &num_files);
 
-	show_folders(w_folders, folders, 2);
-	show_files(w_files, files);
+	int curr_window = FOLDERS;
+	int selection = 2;
+	int input;
+	while ((input = getch()) != 'q') {
+		clock_t start = clock();
+
+		if(curr_window == FOLDERS) {
+			show_folders(w_folders, folders, selection);
+			show_files(w_files, files, -1);
+		} else {
+			show_folders(w_folders, folders, -1);
+			show_files(w_files, files, selection);
+		}
+
+		switch (input) {
+			case 'j':
+				if (curr_window == FOLDERS)
+					selection = selection < num_folders - 1 ? selection + 1 : selection;
+				else
+					selection = selection < num_files - 1 ? selection + 1 : selection;
+				break;
+			case 'k':
+				selection = selection ? selection - 1 : selection;
+				break;
+			case '\t':
+				curr_window = curr_window ? FOLDERS : FILES;
+				selection = 0;
+				break;
+			default:
+				break;
+		}
 	
-	wrefresh(w_path);
-	wrefresh(w_folders);
-	wrefresh(w_files);
-	refresh();
-	getch();
+		wrefresh(w_path);
+		wrefresh(w_folders);
+		wrefresh(w_files);
+		refresh();
+		lock_fps(start, 60);
+	}
 
 	destroy_window(w_path);
 	destroy_window(w_folders);
@@ -36,11 +68,19 @@ int main(void)
 	return 0;
 }
 
-void show_folders(WINDOW *w_folders, struct dirent **folders, int selected)
+void lock_fps(clock_t start, int fps)
+{
+	struct timespec delay;
+	delay.tv_sec = 0;
+	delay.tv_nsec = 1000000000 / fps - (clock() - start) * 1000000000 / CLOCKS_PER_SEC;
+	nanosleep(&delay, NULL);
+}
+
+void show_folders(WINDOW *w_folders, struct dirent **folders, int selection)
 {
 	int i;
-	for(i = 0; folders[i] != NULL; i++) {
-		if(i == selected) {
+	for (i = 0; folders[i] != NULL; i++) {
+		if (i == selection) {
 			wattron(w_folders, A_REVERSE);
 			mvwprintw(w_folders, i+1, 2, "%s", folders[i]->d_name);
 			wattroff(w_folders, A_REVERSE);
@@ -50,10 +90,17 @@ void show_folders(WINDOW *w_folders, struct dirent **folders, int selected)
 	}
 }
 
-void show_files(WINDOW *w_files, struct dirent **files)
+void show_files(WINDOW *w_files, struct dirent **files, int selection)
 {
 	int i;
-	for(i = 0; files[i] != NULL; i++)
-		mvwprintw(w_files, i+1, 2, "%2d) %s [%d]", i, files[i]->d_name, files[i]->d_type);
+	for (i = 0; files[i] != NULL; i++) {
+		if (i == selection) {
+			wattron(w_files, A_REVERSE);
+			mvwprintw(w_files, i+1, 2, "%2d) %s [%d]", i, files[i]->d_name, files[i]->d_type);
+			wattroff(w_files, A_REVERSE);
+		} else {
+			mvwprintw(w_files, i+1, 2, "%2d) %s [%d]", i, files[i]->d_name, files[i]->d_type);
+		}
+	}
 }
 

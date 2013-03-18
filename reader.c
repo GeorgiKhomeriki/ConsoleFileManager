@@ -1,10 +1,10 @@
 #include "reader.h"
 
-void get_folders_and_files(char *path, struct dirent **folders, struct dirent **files)
+void get_folders_and_files(char *path, struct dirent **folders, struct dirent **files, int *num_folders, int *num_files)
 {
 	struct dirent *entries[1024];
 	read_entries(path, entries);
-	split_entries(entries, folders, files);
+	split_entries(entries, folders, files, num_folders, num_files);
 }
 
 void read_entries(char *path, struct dirent **entries)
@@ -19,7 +19,7 @@ void read_entries(char *path, struct dirent **entries)
 	}
 }
 
-void split_entries(struct dirent **entries, struct dirent **folders, struct dirent **files)
+void split_entries(struct dirent **entries, struct dirent **folders, struct dirent **files, int *num_folders, int *num_files)
 {
 	int i, folder_i, file_i;
 	folder_i = file_i = 0;
@@ -31,4 +31,6 @@ void split_entries(struct dirent **entries, struct dirent **folders, struct dire
 			files[file_i++] = entry;
 	}
 	folders[folder_i] = files[file_i] = NULL; // otherwise non-NULL entries can be in array?
+	*num_folders = folder_i;
+	*num_files = file_i;
 }
