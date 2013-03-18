@@ -22,32 +22,34 @@ int main(void)
 	get_folders_and_files(cwd, folders, files, &num_folders, &num_files);
 
 	int curr_window = FOLDERS;
-	int selection = 2;
+	int selection = 0;
+	int folder_selection = 0, file_selection = 0;
 	int input;
 	while ((input = getch()) != 'q') {
 		clock_t start = clock();
 
-		if(curr_window == FOLDERS) {
-			show_folders(w_folders, folders, selection);
-			show_files(w_files, files, -1);
-		} else {
-			show_folders(w_folders, folders, -1);
-			show_files(w_files, files, selection);
-		}
+		show_folders(w_folders, folders, folder_selection, curr_window == FOLDERS);
+		show_files(w_files, files, file_selection, curr_window == FILES);
 
 		switch (input) {
 			case 'j':
 				if (curr_window == FOLDERS)
-					selection = selection < num_folders - 1 ? selection + 1 : selection;
+					folder_selection = folder_selection < num_folders - 1 ? 
+						folder_selection + 1 : folder_selection;
 				else
-					selection = selection < num_files - 1 ? selection + 1 : selection;
+					file_selection = file_selection < num_files - 1 ? 
+						file_selection + 1 : file_selection;
 				break;
 			case 'k':
-				selection = selection ? selection - 1 : selection;
+				if (curr_window == FOLDERS)
+					folder_selection = folder_selection ?
+						folder_selection - 1 : folder_selection;
+				else
+					file_selection = file_selection ?
+						file_selection - 1 : file_selection;
 				break;
 			case '\t':
 				curr_window = curr_window ? FOLDERS : FILES;
-				selection = 0;
 				break;
 			default:
 				break;
@@ -76,11 +78,11 @@ void lock_fps(clock_t start, int fps)
 	nanosleep(&delay, NULL);
 }
 
-void show_folders(WINDOW *w_folders, struct dirent **folders, int selection)
+void show_folders(WINDOW *w_folders, struct dirent **folders, int selection, bool is_active)
 {
 	int i;
 	for (i = 0; folders[i] != NULL; i++) {
-		if (i == selection) {
+		if (is_active && i == selection) {
 			wattron(w_folders, A_REVERSE);
 			mvwprintw(w_folders, i+1, 2, "%s", folders[i]->d_name);
 			wattroff(w_folders, A_REVERSE);
@@ -90,11 +92,11 @@ void show_folders(WINDOW *w_folders, struct dirent **folders, int selection)
 	}
 }
 
-void show_files(WINDOW *w_files, struct dirent **files, int selection)
+void show_files(WINDOW *w_files, struct dirent **files, int selection, bool is_active)
 {
 	int i;
 	for (i = 0; files[i] != NULL; i++) {
-		if (i == selection) {
+		if (is_active && i == selection) {
 			wattron(w_files, A_REVERSE);
 			mvwprintw(w_files, i+1, 2, "%2d) %s [%d]", i, files[i]->d_name, files[i]->d_type);
 			wattroff(w_files, A_REVERSE);
