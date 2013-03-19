@@ -15,7 +15,6 @@ int main(void)
 	
 	char cwd[1024];
 	getcwd(cwd, sizeof(cwd));
-	mvwprintw(w_path, 1, 2, "%s", cwd);
 
 	struct dirent *folders[1024], *files[1024];
 	int num_folders, num_files;
@@ -28,6 +27,8 @@ int main(void)
 	while ((input = getch()) != 'q') {
 		clock_t start = clock();
 
+		mvwprintw(w_path, 1, 2, "%s", cwd);
+		
 		show_folders(w_folders, folders, folder_selection, curr_window == FOLDERS);
 		show_files(w_files, files, file_selection, curr_window == FILES);
 
@@ -50,6 +51,17 @@ int main(void)
 				break;
 			case '\t':
 				curr_window = curr_window ? FOLDERS : FILES;
+				break;
+			case '\n':
+				if (curr_window == FOLDERS) {
+					char *new_dir = folders[folder_selection]->d_name;
+					snprintf(cwd, sizeof cwd, "%s/%s", cwd, new_dir);
+					get_folders_and_files(cwd, folders, files, &num_folders, &num_files);
+					folder_selection = file_selection = 0;
+					clear_window(w_path);
+					clear_window(w_folders);
+					clear_window(w_files);
+				}
 				break;
 			default:
 				break;

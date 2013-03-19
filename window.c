@@ -8,6 +8,12 @@ WINDOW *create_window(int x, int y, int width, int height)
 	return win;
 }
 
+void clear_window(WINDOW *win)
+{
+	wclear(win);
+	box(win, 0, 0);
+}
+
 void destroy_window(WINDOW *win)
 {
 	wborder(win, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');

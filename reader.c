@@ -15,6 +15,7 @@ void read_entries(char *path, struct dirent **entries)
 		struct dirent *entry;
 		for(i = 0; (entry = readdir(dir)) != NULL; i++)
 			entries[i] = entry;
+		entries[i] = NULL;
 		closedir(dir);
 	}
 }
@@ -30,7 +31,7 @@ void split_entries(struct dirent **entries, struct dirent **folders, struct dire
 		else
 			files[file_i++] = entry;
 	}
-	folders[folder_i] = files[file_i] = NULL; // otherwise non-NULL entries can be in array?
+	folders[folder_i] = files[file_i] = NULL;
 	*num_folders = folder_i;
 	*num_files = file_i;
 }
