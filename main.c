@@ -55,7 +55,17 @@ int main(void)
 			case '\n':
 				if (curr_window == FOLDERS) {
 					char *new_dir = folders[folder_selection]->d_name;
-					snprintf(cwd, sizeof cwd, "%s/%s", cwd, new_dir);
+					if (!strcmp(new_dir, "..")) {
+						int slash_index = last_index(cwd, '/');
+						if(!slash_index)
+							snprintf(cwd, sizeof cwd, "/");
+						else
+							cwd[slash_index] = '\0';
+					} else if (strcmp(new_dir, ".")) {
+						if(!strcmp(cwd, "/"))
+							cwd[0] = '\0';
+						snprintf(cwd, sizeof cwd, "%s/%s", cwd, new_dir);
+					}
 					get_folders_and_files(cwd, folders, files, &num_folders, &num_files);
 					folder_selection = file_selection = 0;
 					clear_window(w_path);
@@ -94,12 +104,16 @@ void show_folders(WINDOW *w_folders, struct dirent **folders, int selection, boo
 {
 	int i;
 	for (i = 0; folders[i] != NULL; i++) {
+		char name[1024];
+		strcpy(name, folders[i]->d_name);
+		if(strlen(name) > 15)
+			name[15] = '\0';
 		if (is_active && i == selection) {
 			wattron(w_folders, A_REVERSE);
-			mvwprintw(w_folders, i+1, 2, "%s", folders[i]->d_name);
+			mvwprintw(w_folders, i+1, 2, "%s", name);
 			wattroff(w_folders, A_REVERSE);
 		} else {
-			mvwprintw(w_folders, i+1, 2, "%s", folders[i]->d_name);
+			mvwprintw(w_folders, i+1, 2, "%s", name);
 		}
 	}
 }

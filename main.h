@@ -1,8 +1,10 @@
 #include <ncurses.h>
+#include <stdio.h>
 #include <time.h>
 #include <string.h>
 #include "window.h"
 #include "reader.h"
+#include "util.h"
 
 #define FOLDERS		0
 #define FILES		1
