@@ -2,13 +2,8 @@
 
 int main(void)
 {
-	initscr();
+	init_ncurses();
 	init_screen_params();
-	cbreak();
-	noecho();
-	curs_set(0);
-	nodelay(stdscr, TRUE);
-	refresh();
 
 	WINDOW *w_path = create_window(1, 1, _w_path_width, 3);
 	WINDOW *w_folders = create_window(1, 4, _w_folders_width, _w_folders_height);
@@ -93,7 +88,17 @@ int main(void)
 	return 0;
 }
 
-void init_screen_params()
+void init_ncurses(void)
+{
+	initscr();
+	cbreak();
+	noecho();
+	curs_set(0);
+	nodelay(stdscr, TRUE);
+	refresh();
+}
+
+void init_screen_params(void)
 {
 	_w_path_width = COLS - 3;
 	_w_folders_width = COLS / 3;
@@ -113,7 +118,7 @@ void lock_fps(clock_t start, int fps)
 void show_folders(WINDOW *w_folders, struct dirent **folders, int selection, bool is_active)
 {
 	int i;
-	for (i = 0; folders[i] != NULL; i++) {
+	for (i = 0; folders[i] != NULL && i < _w_folders_height - 2; i++) {
 		char name[1024];
 		strcpy(name, folders[i]->d_name);
 		if(strlen(name) > _w_folders_width - 3)
@@ -131,7 +136,7 @@ void show_folders(WINDOW *w_folders, struct dirent **folders, int selection, boo
 void show_files(WINDOW *w_files, struct dirent **files, int selection, bool is_active)
 {
 	int i;
-	for (i = 0; files[i] != NULL; i++) {
+	for (i = 0; files[i] != NULL && i < _w_files_height - 2; i++) {
 		char name[1024];
 		strcpy(name, files[i]->d_name);
 		if(strlen(name) > _w_files_width - 13)
