@@ -3,15 +3,16 @@
 int main(void)
 {
 	initscr();
+	init_screen_params();
 	cbreak();
 	noecho();
 	curs_set(0);
 	nodelay(stdscr, TRUE);
 	refresh();
 
-	WINDOW *w_path = create_window(1, 1, COLS - 3, 3);
-	WINDOW *w_folders = create_window(1, 4, COLS / 3, LINES - 10);
-	WINDOW *w_files = create_window(COLS / 3 + 2, 4, 2 * COLS / 3 - 3, LINES - 10);
+	WINDOW *w_path = create_window(1, 1, _w_path_width, 3);
+	WINDOW *w_folders = create_window(1, 4, _w_folders_width, _w_folders_height);
+	WINDOW *w_files = create_window(_w_folders_width + 2, 4, _w_files_width, _w_files_height);
 	
 	char cwd[1024];
 	getcwd(cwd, sizeof(cwd));
@@ -92,6 +93,15 @@ int main(void)
 	return 0;
 }
 
+void init_screen_params()
+{
+	_w_path_width = COLS - 3;
+	_w_folders_width = COLS / 3;
+	_w_folders_height = LINES - 10;
+	_w_files_width = 2 * COLS / 3 - 3;
+	_w_files_height = _w_folders_height;
+}
+
 void lock_fps(clock_t start, int fps)
 {
 	struct timespec delay;
@@ -106,8 +116,8 @@ void show_folders(WINDOW *w_folders, struct dirent **folders, int selection, boo
 	for (i = 0; folders[i] != NULL; i++) {
 		char name[1024];
 		strcpy(name, folders[i]->d_name);
-		if(strlen(name) > 15)
-			name[15] = '\0';
+		if(strlen(name) > _w_folders_width - 3)
+			name[_w_folders_width - 3] = '\0';
 		if (is_active && i == selection) {
 			wattron(w_folders, A_REVERSE);
 			mvwprintw(w_folders, i+1, 2, "%s", name);
@@ -122,12 +132,16 @@ void show_files(WINDOW *w_files, struct dirent **files, int selection, bool is_a
 {
 	int i;
 	for (i = 0; files[i] != NULL; i++) {
+		char name[1024];
+		strcpy(name, files[i]->d_name);
+		if(strlen(name) > _w_files_width - 13)
+			name[_w_files_width - 13] = '\0';
 		if (is_active && i == selection) {
 			wattron(w_files, A_REVERSE);
-			mvwprintw(w_files, i+1, 2, "%2d) %s [%d]", i, files[i]->d_name, files[i]->d_type);
+			mvwprintw(w_files, i+1, 2, "%2d) %s [%d]", i, name, files[i]->d_type);
 			wattroff(w_files, A_REVERSE);
 		} else {
-			mvwprintw(w_files, i+1, 2, "%2d) %s [%d]", i, files[i]->d_name, files[i]->d_type);
+			mvwprintw(w_files, i+1, 2, "%2d) %s [%d]", i, name, files[i]->d_type);
 		}
 	}
 }
