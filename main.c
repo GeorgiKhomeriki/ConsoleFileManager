@@ -100,10 +100,10 @@ void init_ncurses(void)
 
 void init_screen_params(void)
 {
-	_w_path_width = COLS - 3;
+	_w_path_width = COLS - 2;
 	_w_folders_width = COLS / 3;
 	_w_folders_height = LINES - 10;
-	_w_files_width = 2 * COLS / 3 - 3;
+	_w_files_width = 2 * COLS / 3 - 2;
 	_w_files_height = _w_folders_height;
 }
 
@@ -121,7 +121,7 @@ void show_folders(WINDOW *w_folders, struct dirent **folders, int selection, boo
 	for (i = 0; folders[i] != NULL && i < _w_folders_height - 2; i++) {
 		char name[1024];
 		strcpy(name, folders[i]->d_name);
-		if(strlen(name) > _w_folders_width - 3)
+		if(folders[i]->d_namlen > _w_folders_width - 3)
 			name[_w_folders_width - 3] = '\0';
 		if (is_active && i == selection) {
 			wattron(w_folders, A_REVERSE);
@@ -139,7 +139,7 @@ void show_files(WINDOW *w_files, struct dirent **files, int selection, bool is_a
 	for (i = 0; files[i] != NULL && i < _w_files_height - 2; i++) {
 		char name[1024];
 		strcpy(name, files[i]->d_name);
-		if(strlen(name) > _w_files_width - 13)
+		if(files[i]->d_namlen > _w_files_width - 13)
 			name[_w_files_width - 13] = '\0';
 		if (is_active && i == selection) {
 			wattron(w_files, A_REVERSE);
