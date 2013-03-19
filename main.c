@@ -46,7 +46,7 @@ int main(void)
 						file_selection - 1 : file_selection;
 				break;
 			case '\t':
-				curr_window = curr_window ? FOLDERS : FILES;
+				curr_window = curr_window || num_files <= 0 ? FOLDERS : FILES;
 				break;
 			case '\n':
 				if (curr_window == FOLDERS) {
