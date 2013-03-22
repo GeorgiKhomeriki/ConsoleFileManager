@@ -97,18 +97,6 @@ int main(void)
 	return 0;
 }
 
-void scroll_window(WINDOW *win, int curr_window, int *selection, int *offset, int delta)
-{
-	int win_height = curr_window ? _w_files_height : _w_folders_height;
-	int max_entries = curr_window ? _max_files : _max_folders;
-	if(delta > 0 && *selection >= max_entries && *selection - *offset >= win_height - 2) {
-		*offset += delta;
-		clear_window(win);
-	} else if(delta < 0 && *offset > 0 && *selection - *offset < 0) {
-		*offset += delta;
-		clear_window(win);
-	}
-}
 
 void init_ncurses(void)
 {
@@ -173,5 +161,14 @@ void show_files(WINDOW *w_files, struct dirent **files, int selection, int offse
 			mvwprintw(w_files, i + 1 - offset, 2, "%2d) %s [%d]", i, name, files[i]->d_type);
 		}
 	}
+}
+
+void scroll_window(WINDOW *win, int curr_window, int *selection, int *offset, int delta)
+{
+	int win_height = curr_window ? _w_files_height : _w_folders_height;
+	int max_entries = curr_window ? _max_files : _max_folders;
+	if(*selection >= max_entries && *selection - *offset >= win_height - 2
+		|| *offset > 0 && *selection - *offset < 0)
+		*offset += delta;
 }
 
