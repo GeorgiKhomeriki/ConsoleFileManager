@@ -23,3 +23,4 @@ void lock_fps(clock_t start, int fps);
 void show_folders(WINDOW *w_folders, struct dirent **folders, int selection, int offset, bool is_active);
 void show_files(WINDOW *w_files, struct dirent **files, int selection, int offset, bool is_active);
 void scroll_window(WINDOW *win, int curr_window, int *selection, int *offset, int delta);
+

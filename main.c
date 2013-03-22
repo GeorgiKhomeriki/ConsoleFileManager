@@ -135,6 +135,7 @@ void show_folders(WINDOW *w_folders, struct dirent **folders, int selection, int
 		strcpy(name, folders[i]->d_name);
 		if(folders[i]->d_namlen > _w_folders_width - 3)
 			name[_w_folders_width - 3] = '\0';
+		pad_string(name, _w_folders_width - 3);
 		if (is_active && i == selection) {
 			wattron(w_folders, A_REVERSE);
 			mvwprintw(w_folders, i + 1 - offset, 2, "%s", name);
@@ -153,6 +154,7 @@ void show_files(WINDOW *w_files, struct dirent **files, int selection, int offse
 		strcpy(name, files[i]->d_name);
 		if(files[i]->d_namlen > _w_files_width - 13)
 			name[_w_files_width - 13] = '\0';
+		pad_string(name, _w_files_width - 13);
 		if (is_active && i == selection) {
 			wattron(w_files, A_REVERSE);
 			mvwprintw(w_files, i + 1 - offset, 2, "%2d) %s [%d]", i, name, files[i]->d_type);
