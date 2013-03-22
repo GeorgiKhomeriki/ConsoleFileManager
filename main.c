@@ -27,34 +27,29 @@ int main(void)
 		mvwprintw(w_path, 1, 2, "%s", cwd);
 		
 		show_folders(w_folders, folders, folder_selection, offset_folders, curr_window == FOLDERS);
-		show_files(w_files, files, file_selection, curr_window == FILES);
+		show_files(w_files, files, file_selection, offset_files, curr_window == FILES);
 
 		switch (input) {
 			case 'j':
 				if (curr_window == FOLDERS) {
 					folder_selection = folder_selection < num_folders - 1 ? 
 						folder_selection + 1 : folder_selection;
-					if(folder_selection >= _max_folders && 
-							folder_selection - offset_folders >= _w_folders_height - 2) {
-						offset_folders++;
-						clear_window(w_folders);
-					} 
+					scroll_window(w_folders, curr_window, &folder_selection, &offset_folders, 1);
 				} else {
 					file_selection = file_selection < num_files - 1 ? 
 						file_selection + 1 : file_selection;
+					scroll_window(w_files, curr_window, &file_selection, &offset_files, 1);
 				}
 				break;
 			case 'k':
 				if (curr_window == FOLDERS) {
 					folder_selection = folder_selection ?
 						folder_selection - 1 : folder_selection;
-					if(offset_folders > 0 && folder_selection - offset_folders < 0) {
-						offset_folders--;
-						clear_window(w_folders);
-					}
+					scroll_window(w_folders, curr_window, &folder_selection, &offset_folders, -1);
 				} else {
 					file_selection = file_selection ?
 						file_selection - 1 : file_selection;
+					scroll_window(w_files, curr_window, &file_selection, &offset_files, -1);
 				}
 				break;
 			case '\t':
@@ -100,6 +95,19 @@ int main(void)
 
 	endwin();
 	return 0;
+}
+
+void scroll_window(WINDOW *win, int curr_window, int *selection, int *offset, int delta)
+{
+	int win_height = curr_window ? _w_files_height : _w_folders_height;
+	int max_entries = curr_window ? _max_files : _max_folders;
+	if(delta > 0 && *selection >= max_entries && *selection - *offset >= win_height - 2) {
+		*offset += delta;
+		clear_window(win);
+	} else if(delta < 0 && *offset > 0 && *selection - *offset < 0) {
+		*offset += delta;
+		clear_window(win);
+	}
 }
 
 void init_ncurses(void)
@@ -149,20 +157,20 @@ void show_folders(WINDOW *w_folders, struct dirent **folders, int selection, int
 	}
 }
 
-void show_files(WINDOW *w_files, struct dirent **files, int selection, bool is_active)
+void show_files(WINDOW *w_files, struct dirent **files, int selection, int offset, bool is_active)
 {
 	int i;
-	for (i = 0; files[i] != NULL && i < _max_files; i++) {
+	for (i = offset; files[i] != NULL && i - offset < _max_files; i++) {
 		char name[1024];
 		strcpy(name, files[i]->d_name);
 		if(files[i]->d_namlen > _w_files_width - 13)
 			name[_w_files_width - 13] = '\0';
 		if (is_active && i == selection) {
 			wattron(w_files, A_REVERSE);
-			mvwprintw(w_files, i+1, 2, "%2d) %s [%d]", i, name, files[i]->d_type);
+			mvwprintw(w_files, i + 1 - offset, 2, "%2d) %s [%d]", i, name, files[i]->d_type);
 			wattroff(w_files, A_REVERSE);
 		} else {
-			mvwprintw(w_files, i+1, 2, "%2d) %s [%d]", i, name, files[i]->d_type);
+			mvwprintw(w_files, i + 1 - offset, 2, "%2d) %s [%d]", i, name, files[i]->d_type);
 		}
 	}
 }
