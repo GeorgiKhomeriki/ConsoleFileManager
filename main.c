@@ -26,8 +26,8 @@ int main(void)
 
 		mvwprintw(w_path, 1, 2, "%s", cwd);
 		
-		show_folders(w_folders, folders, folder_selection, offset_folders, curr_window == FOLDERS);
-		show_files(w_files, files, file_selection, offset_files, curr_window == FILES);
+		show_entities(w_folders, FOLDERS, folders, folder_selection, offset_folders, curr_window == FOLDERS);
+		show_entities(w_files, FILES, files, file_selection, offset_files, curr_window == FILES);
 
 		switch (input) {
 			case 'j':
@@ -127,40 +127,24 @@ void lock_fps(clock_t start, int fps)
 	nanosleep(&delay, NULL);
 }
 
-void show_folders(WINDOW *w_folders, struct dirent **folders, int selection, int offset, bool is_active)
+void show_entities(WINDOW *win, int win_type, struct dirent **entities, int selection, int offset, bool is_active)
 {
+	int max_entities = win_type ? _max_files : _max_folders;
+	int width = win_type ? _w_files_width - 13 : _w_folders_width - 3;
 	int i;
-	for (i = offset; folders[i] != NULL && i - offset < _max_folders; i++) {
+	for(i = offset; entities[i] != NULL && i - offset < max_entities; i++) {
 		char name[1024];
-		strcpy(name, folders[i]->d_name);
-		if(folders[i]->d_namlen > _w_folders_width - 3)
-			name[_w_folders_width - 3] = '\0';
-		pad_string(name, _w_folders_width - 3);
-		if (is_active && i == selection) {
-			wattron(w_folders, A_REVERSE);
-			mvwprintw(w_folders, i + 1 - offset, 2, "%s", name);
-			wattroff(w_folders, A_REVERSE);
+		strcpy(name, entities[i]->d_name);
+		if(entities[i]->d_namlen > width)
+			name[width] = '\0';
+		pad_string(name, width);
+		if(is_active && i == selection) {
+			wattron(win, A_REVERSE);
+			mvwprintw(win, i + 1 - offset, 2, "%s", name);
+			//mvwprintw(win, i + 1 - offset, 2, "%2d) %s [%d]", i, name, entities[i]->d_type);
+			wattroff(win, A_REVERSE);
 		} else {
-			mvwprintw(w_folders, i + 1 - offset, 2, "%s", name);
-		}
-	}
-}
-
-void show_files(WINDOW *w_files, struct dirent **files, int selection, int offset, bool is_active)
-{
-	int i;
-	for (i = offset; files[i] != NULL && i - offset < _max_files; i++) {
-		char name[1024];
-		strcpy(name, files[i]->d_name);
-		if(files[i]->d_namlen > _w_files_width - 13)
-			name[_w_files_width - 13] = '\0';
-		pad_string(name, _w_files_width - 13);
-		if (is_active && i == selection) {
-			wattron(w_files, A_REVERSE);
-			mvwprintw(w_files, i + 1 - offset, 2, "%2d) %s [%d]", i, name, files[i]->d_type);
-			wattroff(w_files, A_REVERSE);
-		} else {
-			mvwprintw(w_files, i + 1 - offset, 2, "%2d) %s [%d]", i, name, files[i]->d_type);
+			mvwprintw(win, i + 1 - offset, 2, "%s", name);
 		}
 	}
 }
