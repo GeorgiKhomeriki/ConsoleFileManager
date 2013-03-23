@@ -30,6 +30,8 @@ int main(void)
 				curr_window == FOLDERS, &show_folder);
 		show_entries(w_files, FILES, files, file_selection, offset_files, 
 				curr_window == FILES, &show_file);
+		draw_scrollbar(w_files, num_files, _w_files_width - 2, _w_files_height - 2, offset_files);
+		draw_scrollbar(w_folders, num_folders, _w_folders_width - 2, _w_folders_height - 2, offset_folders);
 
 		switch (input) {
 			case 'j':
@@ -130,7 +132,7 @@ void show_entries(WINDOW *win, int win_type, struct dirent **entries, int select
 	int i;
 	for(i = offset; entries[i] != NULL && i - offset < max_entries; i++) {
 		bool is_selected = is_active && i == selection;
-		if(is_selected) {
+		if (is_selected) {
 			wattron(win, A_REVERSE);
 			show(win, i + 1 - offset, width, entries[i], is_selected);
 			wattroff(win, A_REVERSE);
@@ -148,6 +150,21 @@ void show_folder(WINDOW *win, int y, int width, struct dirent *folder, bool is_s
 void show_file(WINDOW *win, int y, int width, struct dirent *file, bool is_selected)
 {
 	mvwprintw(win, y, 2, "%-*.*s [%d]", width, width, file->d_name, file->d_type);
+}
+
+void draw_scrollbar(WINDOW *win, int num_entries, int x, int win_height, int offset)
+{
+	if (num_entries > win_height) {
+		float sb_ratio = (float)win_height / (float)num_entries;
+		int sb_height = sb_ratio * win_height + 2;
+		int sb_offset = sb_ratio * offset;
+
+		int y;
+		for (y = 1; y <= win_height; y++) {
+			char c = y > sb_offset && y < sb_offset + sb_height ? '#' : ' ';
+			mvwprintw(win, y, x, "%c", c);
+		}
+	}
 }
 
 void move_cursor(WINDOW *win, int curr_window, int *selection, int num_entries, int *offset, int dir)
