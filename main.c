@@ -30,8 +30,10 @@ int main(void)
 				curr_window == FOLDERS, &show_folder);
 		show_entries(w_files, FILES, files, file_selection, offset_files, 
 				curr_window == FILES, &show_file);
-		draw_scrollbar(w_files, num_files, _w_files_width - 2, _w_files_height - 2, offset_files);
 		draw_scrollbar(w_folders, num_folders, _w_folders_width - 2, _w_folders_height - 2, offset_folders);
+		draw_scrollbar(w_files, num_files, _w_files_width - 2, _w_files_height - 2, offset_files);
+		draw_title(w_folders, "folders");
+		draw_title(w_files, "files");
 
 		switch (input) {
 			case 'j':
