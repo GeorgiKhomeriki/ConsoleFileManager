@@ -9,13 +9,3 @@ int last_index(char* s, char c)
 	return result;
 }
 
-void pad_string(char *str, int length)
-{
-	int i;
-	for (i = 0; str[i]; i++);	
-
-	for (; i < length; i++)
-		str[i] = ' ';
-	str[i] = '\0';
-}
-

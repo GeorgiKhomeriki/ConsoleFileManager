@@ -93,8 +93,6 @@ int main(void)
 	return 0;
 }
 
-
-
 void init_ncurses(void)
 {
 	initscr();
@@ -144,22 +142,12 @@ void show_entries(WINDOW *win, int win_type, struct dirent **entries, int select
 
 void show_folder(WINDOW *win, int y, int width, struct dirent *folder, bool is_selected)
 {
-	char name[1024];
-	strcpy(name, folder->d_name);
-	if(folder->d_namlen > width)
-		name[width] = '\0';
-	pad_string(name, width);
-	mvwprintw(win, y, 2, "%s", name);
+	mvwprintw(win, y, 2, "%-*.*s", width, width, folder->d_name);
 }
 
 void show_file(WINDOW *win, int y, int width, struct dirent *file, bool is_selected)
 {
-	char name[1024];
-	strcpy(name, file->d_name);
-	if(file->d_namlen > width)
-		name[width] = '\0';
-	pad_string(name, width);
-	mvwprintw(win, y, 2, "%s [%d]", name, file->d_type);
+	mvwprintw(win, y, 2, "%-*.*s [%d]", width, width, file->d_name, file->d_type);
 }
 
 void move_cursor(WINDOW *win, int curr_window, int *selection, int num_entries, int *offset, int dir)
