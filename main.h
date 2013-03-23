@@ -21,6 +21,7 @@ static int _max_folders;
 static int _max_files;
 
 void init_ncurses(void);
+void init_colors(void);
 void init_screen_params(void);
 void lock_fps(clock_t start, int fps);
 void show_entries(WINDOW *win, int win_type, struct dirent **entries, int selection, int offset, bool is_active,

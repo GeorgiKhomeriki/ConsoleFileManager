@@ -103,11 +103,24 @@ void init_ncurses(void)
 	curs_set(0);
 	nodelay(stdscr, TRUE);
 	refresh();
+	init_colors();
+}
+
+void init_colors(void)
+{
+	start_color();
+	init_pair(COLOR_RED, COLOR_RED, COLOR_BLACK);
+	init_pair(COLOR_GREEN, COLOR_GREEN, COLOR_BLACK);
+	init_pair(COLOR_YELLOW, COLOR_YELLOW, COLOR_BLACK);
+	init_pair(COLOR_BLUE, COLOR_BLUE, COLOR_BLACK);
+	init_pair(COLOR_MAGENTA, COLOR_MAGENTA, COLOR_BLACK);
+	init_pair(COLOR_CYAN, COLOR_CYAN, COLOR_BLACK);
+	init_pair(COLOR_WHITE, COLOR_WHITE, COLOR_BLACK);
 }
 
 void init_screen_params(void)
 {
-	_w_path_width = COLS - 1;
+	_w_path_width = COLS - 2;
 	_w_folders_width = COLS / 3;
 	_w_folders_height = (LINES - 10)/3;
 	_w_files_width = 2 * COLS / 3 - 2;
@@ -144,12 +157,17 @@ void show_entries(WINDOW *win, int win_type, struct dirent **entries, int select
 
 void show_folder(WINDOW *win, int y, int width, struct dirent *folder, bool is_selected)
 {
+	wattron(win, COLOR_PAIR(COLOR_WHITE));
 	mvwprintw(win, y, 2, "%-*.*s", width, width, folder->d_name);
+	wattroff(win, COLOR_PAIR(COLOR_WHITE));
 }
 
 void show_file(WINDOW *win, int y, int width, struct dirent *file, bool is_selected)
 {
+	int color = file->d_type == DT_REG ? COLOR_WHITE : COLOR_CYAN;
+	wattron(win, COLOR_PAIR(color));
 	mvwprintw(win, y, 2, "%-*.*s [%d]", width, width, file->d_name, file->d_type);
+	wattroff(win, COLOR_PAIR(color));
 }
 
 void draw_scrollbar(WINDOW *win, int num_entries, int x, int win_height, int offset)
@@ -158,12 +176,13 @@ void draw_scrollbar(WINDOW *win, int num_entries, int x, int win_height, int off
 		float sb_ratio = (float)win_height / (float)num_entries;
 		int sb_height = sb_ratio * win_height + 2;
 		int sb_offset = sb_ratio * offset;
-
+		wattron(win, COLOR_PAIR(COLOR_YELLOW));
 		int y;
 		for (y = 1; y <= win_height; y++) {
 			char c = y > sb_offset && y < sb_offset + sb_height ? '#' : ' ';
 			mvwprintw(win, y, x, "%c", c);
 		}
+		wattroff(win, COLOR_PAIR(COLOR_YELLOW));
 	}
 }
 
