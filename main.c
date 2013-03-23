@@ -26,31 +26,27 @@ int main(void)
 
 		mvwprintw(w_path, 1, 2, "%s", cwd);
 		
-		show_entities(w_folders, FOLDERS, folders, folder_selection, offset_folders, curr_window == FOLDERS);
-		show_entities(w_files, FILES, files, file_selection, offset_files, curr_window == FILES);
+		show_entries(w_folders, FOLDERS, folders, folder_selection, offset_folders, 
+				curr_window == FOLDERS, &show_folder);
+		show_entries(w_files, FILES, files, file_selection, offset_files, 
+				curr_window == FILES, &show_file);
 
 		switch (input) {
 			case 'j':
-				if (curr_window == FOLDERS) {
-					folder_selection = folder_selection < num_folders - 1 ? 
-						folder_selection + 1 : folder_selection;
-					scroll_window(w_folders, curr_window, &folder_selection, &offset_folders, 1);
-				} else {
-					file_selection = file_selection < num_files - 1 ? 
-						file_selection + 1 : file_selection;
-					scroll_window(w_files, curr_window, &file_selection, &offset_files, 1);
-				}
+				if (curr_window == FOLDERS)
+					move_cursor(w_folders, curr_window, &folder_selection,
+							num_folders, &offset_folders, DOWN);
+				else
+					move_cursor(w_files, curr_window, &file_selection,
+							num_files, &offset_files, DOWN);
 				break;
 			case 'k':
-				if (curr_window == FOLDERS) {
-					folder_selection = folder_selection ?
-						folder_selection - 1 : folder_selection;
-					scroll_window(w_folders, curr_window, &folder_selection, &offset_folders, -1);
-				} else {
-					file_selection = file_selection ?
-						file_selection - 1 : file_selection;
-					scroll_window(w_files, curr_window, &file_selection, &offset_files, -1);
-				}
+				if (curr_window == FOLDERS)
+					move_cursor(w_folders, curr_window, &folder_selection,
+							num_folders, &offset_folders, UP);
+				else
+					move_cursor(w_files, curr_window, &file_selection,
+							num_files, &offset_files, UP);
 				break;
 			case '\t':
 				curr_window = curr_window || num_files <= 0 ? FOLDERS : FILES;
@@ -98,6 +94,7 @@ int main(void)
 }
 
 
+
 void init_ncurses(void)
 {
 	initscr();
@@ -112,7 +109,7 @@ void init_screen_params(void)
 {
 	_w_path_width = COLS - 1;
 	_w_folders_width = COLS / 3;
-	_w_folders_height = (LINES - 10) / 3; // LINES - 10
+	_w_folders_height = (LINES - 10)/3;
 	_w_files_width = 2 * COLS / 3 - 2;
 	_w_files_height = _w_folders_height;
 	_max_folders = _w_folders_height - 2;
@@ -127,26 +124,50 @@ void lock_fps(clock_t start, int fps)
 	nanosleep(&delay, NULL);
 }
 
-void show_entities(WINDOW *win, int win_type, struct dirent **entities, int selection, int offset, bool is_active)
+void show_entries(WINDOW *win, int win_type, struct dirent **entries, int selection, int offset, bool is_active, 
+		void (*show)(WINDOW *win, int y, int width, struct dirent *entry, bool is_selected))
 {
-	int max_entities = win_type ? _max_files : _max_folders;
+	int max_entries = win_type ? _max_files : _max_folders;
 	int width = win_type ? _w_files_width - 13 : _w_folders_width - 3;
 	int i;
-	for(i = offset; entities[i] != NULL && i - offset < max_entities; i++) {
-		char name[1024];
-		strcpy(name, entities[i]->d_name);
-		if(entities[i]->d_namlen > width)
-			name[width] = '\0';
-		pad_string(name, width);
-		if(is_active && i == selection) {
+	for(i = offset; entries[i] != NULL && i - offset < max_entries; i++) {
+		bool is_selected = is_active && i == selection;
+		if(is_selected) {
 			wattron(win, A_REVERSE);
-			mvwprintw(win, i + 1 - offset, 2, "%s", name);
-			//mvwprintw(win, i + 1 - offset, 2, "%2d) %s [%d]", i, name, entities[i]->d_type);
+			show(win, i + 1 - offset, width, entries[i], is_selected);
 			wattroff(win, A_REVERSE);
 		} else {
-			mvwprintw(win, i + 1 - offset, 2, "%s", name);
+			show(win, i + 1 - offset, width, entries[i], is_selected);
 		}
 	}
+}
+
+void show_folder(WINDOW *win, int y, int width, struct dirent *folder, bool is_selected)
+{
+	char name[1024];
+	strcpy(name, folder->d_name);
+	if(folder->d_namlen > width)
+		name[width] = '\0';
+	pad_string(name, width);
+	mvwprintw(win, y, 2, "%s", name);
+}
+
+void show_file(WINDOW *win, int y, int width, struct dirent *file, bool is_selected)
+{
+	char name[1024];
+	strcpy(name, file->d_name);
+	if(file->d_namlen > width)
+		name[width] = '\0';
+	pad_string(name, width);
+	mvwprintw(win, y, 2, "%s [%d]", name, file->d_type);
+}
+
+void move_cursor(WINDOW *win, int curr_window, int *selection, int num_entries, int *offset, int dir)
+{
+	if (dir == DOWN && *selection < num_entries - 1
+			|| dir == UP && *selection)
+		*selection += dir;
+	scroll_window(win, curr_window, selection, offset, dir);
 }
 
 void scroll_window(WINDOW *win, int curr_window, int *selection, int *offset, int delta)
