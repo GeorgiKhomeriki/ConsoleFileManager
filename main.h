@@ -1,5 +1,6 @@
 #include <ncurses.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 #include <string.h>
 #include "window.h"
@@ -31,4 +32,5 @@ void show_file(WINDOW *win, int y, int width, struct dirent *file, bool is_selec
 void draw_scrollbar(WINDOW *win, int num_entries, int x, int win_height, int offset);
 void move_cursor(WINDOW *win, int curr_window, int *selection, int num_entries, int *offset, int dir);
 void scroll_window(WINDOW *win, int curr_window, int *selection, int *offset, int delta);
+void run_command(char *command);
 

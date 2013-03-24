@@ -8,6 +8,7 @@ int main(void)
 	WINDOW *w_path = create_window(1, 1, _w_path_width, 3);
 	WINDOW *w_folders = create_window(1, 4, _w_folders_width, _w_folders_height);
 	WINDOW *w_files = create_window(_w_folders_width + 2, 4, _w_files_width, _w_files_height);
+	WINDOW *windows[] = {w_path, w_folders, w_files, 0};
 	
 	char cwd[1024];
 	getcwd(cwd, sizeof(cwd));
@@ -73,9 +74,12 @@ int main(void)
 					get_folders_and_files(cwd, folders, files, &num_folders, &num_files);
 					folder_selection = file_selection = 0;
 					offset_folders = offset_files = 0;
-					clear_window(w_path);
-					clear_window(w_folders);
-					clear_window(w_files);
+					clear_windows(windows);
+				} else {
+					char cmd[1024], command[1024];
+					snprintf(cmd, sizeof cmd, "vim %s/%s", cwd, files[file_selection]->d_name);
+					escape_path(cmd, command);
+					run_command(command);
 				}
 				break;
 			default:
@@ -89,6 +93,10 @@ int main(void)
 		lock_fps(start, 60);
 	}
 
+	clear();
+	wclear(w_path);
+	wclear(w_folders);
+	wclear(w_files);
 	destroy_window(w_path);
 	destroy_window(w_folders);
 	destroy_window(w_files);
@@ -130,6 +138,7 @@ void init_screen_params(void)
 	_max_folders = _w_folders_height - 2;
 	_max_files = _w_files_height - 2;
 }
+
 
 void lock_fps(clock_t start, int fps)
 {
@@ -205,3 +214,10 @@ void scroll_window(WINDOW *win, int curr_window, int *selection, int *offset, in
 		*offset += delta;
 }
 
+void run_command(char *command)
+{
+	def_prog_mode();
+	endwin();
+	system(command);
+	reset_prog_mode();
+}

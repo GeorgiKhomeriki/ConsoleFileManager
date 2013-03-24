@@ -8,6 +8,13 @@ WINDOW *create_window(int x, int y, int width, int height)
 	return win;
 }
 
+void clear_windows(WINDOW **windows)
+{
+	int i;
+	for(i = 0; windows[i]; i++)
+		clear_window(windows[i]);
+}
+
 void clear_window(WINDOW *win)
 {
 	wclear(win);
