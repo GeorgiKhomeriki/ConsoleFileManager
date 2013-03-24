@@ -13,7 +13,9 @@ int main(void)
 	char cwd[1024];
 	getcwd(cwd, sizeof(cwd));
 
-	struct dirent *folders[1024], *files[1024];
+	struct fs_entry *folders[1024], *files[1024];
+	malloc_entries(folders, 1024);
+	malloc_entries(files, 1024);
 	int num_folders, num_files;
 	get_folders_and_files(cwd, folders, files, &num_folders, &num_files);
 
@@ -59,7 +61,7 @@ int main(void)
 			case 'f':
 			case '\n':
 				if (curr_window == FOLDERS) {
-					char *new_dir = folders[folder_selection]->d_name;
+					char *new_dir = folders[folder_selection]->ent->d_name;
 					if (!strcmp(new_dir, "..")) {
 						int slash_index = last_index(cwd, '/');
 						if(!slash_index)
@@ -77,7 +79,8 @@ int main(void)
 					clear_windows(windows);
 				} else {
 					char cmd[1024], command[1024];
-					snprintf(cmd, sizeof cmd, "vim %s/%s", cwd, files[file_selection]->d_name);
+					snprintf(cmd, sizeof cmd, "vim %s/%s", cwd, 
+							files[file_selection]->ent->d_name);
 					escape_path(cmd, command);
 					run_command(command);
 				}
@@ -148,13 +151,13 @@ void lock_fps(clock_t start, int fps)
 	nanosleep(&delay, NULL);
 }
 
-void show_entries(WINDOW *win, int win_type, struct dirent **entries, int selection, int offset, bool is_active, 
-		void (*show)(WINDOW *win, int y, int width, struct dirent *entry, bool is_selected))
+void show_entries(WINDOW *win, int win_type, struct fs_entry **entries, int selection, int offset, bool is_active, 
+		void (*show)(WINDOW *win, int y, int width, struct fs_entry *entry, bool is_selected))
 {
 	int max_entries = win_type ? _max_files : _max_folders;
 	int width = win_type ? _w_files_width - 13 : _w_folders_width - 3;
 	int i;
-	for(i = offset; entries[i] != NULL && i - offset < max_entries; i++) {
+	for(i = offset; entries[i]->ent != NULL && i - offset < max_entries; i++) {
 		bool is_selected = is_active && i == selection;
 		if (is_selected) {
 			wattron(win, A_REVERSE);
@@ -166,18 +169,18 @@ void show_entries(WINDOW *win, int win_type, struct dirent **entries, int select
 	}
 }
 
-void show_folder(WINDOW *win, int y, int width, struct dirent *folder, bool is_selected)
+void show_folder(WINDOW *win, int y, int width, struct fs_entry *folder, bool is_selected)
 {
 	wattron(win, COLOR_PAIR(COLOR_WHITE));
-	mvwprintw(win, y, 2, "%-*.*s", width, width, folder->d_name);
+	mvwprintw(win, y, 2, "%-*.*s", width, width, folder->ent->d_name);
 	wattroff(win, COLOR_PAIR(COLOR_WHITE));
 }
 
-void show_file(WINDOW *win, int y, int width, struct dirent *file, bool is_selected)
+void show_file(WINDOW *win, int y, int width, struct fs_entry *file, bool is_selected)
 {
-	int color = file->d_type == DT_REG ? COLOR_WHITE : COLOR_CYAN;
+	int color = file->ent->d_type == DT_REG ? COLOR_WHITE : COLOR_CYAN;
 	wattron(win, COLOR_PAIR(color));
-	mvwprintw(win, y, 2, "%-*.*s [%d]", width, width, file->d_name, file->d_type);
+	mvwprintw(win, y, 2, "%-*.*s [%d]", width, width, file->ent->d_name, file->ent->d_type);
 	wattroff(win, COLOR_PAIR(color));
 }
 

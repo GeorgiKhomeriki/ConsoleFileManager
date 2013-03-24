@@ -25,10 +25,10 @@ void init_ncurses(void);
 void init_colors(void);
 void init_screen_params(void);
 void lock_fps(clock_t start, int fps);
-void show_entries(WINDOW *win, int win_type, struct dirent **entries, int selection, int offset, bool is_active,
-		void (*show)(WINDOW *win, int y, int width, struct dirent *entry, bool is_selected));
-void show_folder(WINDOW *win, int y, int width, struct dirent *entry, bool is_selected);
-void show_file(WINDOW *win, int y, int width, struct dirent *file, bool is_selected);
+void show_entries(WINDOW *win, int win_type, struct fs_entry **entries, int selection, int offset, bool is_active,
+		void (*show)(WINDOW *win, int y, int width, struct fs_entry *entry, bool is_selected));
+void show_folder(WINDOW *win, int y, int width, struct fs_entry *entry, bool is_selected);
+void show_file(WINDOW *win, int y, int width, struct fs_entry *file, bool is_selected);
 void draw_scrollbar(WINDOW *win, int num_entries, int x, int win_height, int offset);
 void move_cursor(WINDOW *win, int curr_window, int *selection, int num_entries, int *offset, int dir);
 void scroll_window(WINDOW *win, int curr_window, int *selection, int *offset, int delta);
