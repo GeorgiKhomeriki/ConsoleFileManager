@@ -80,9 +80,15 @@ int main(void)
 					clear_windows(windows);
 				} else {
 					char cmd[1024], command[1024];
-					snprintf(cmd, sizeof cmd, "vim %s/%s", cwd, 
+					if (files[file_selection]->can_exec) {
+						snprintf(cmd, sizeof cmd, "%s/%s", cwd, 
 							files[file_selection]->ent->d_name);
-					escape_path(cmd, command);
+						escape_path(cmd, command, false);
+					} else {
+						snprintf(cmd, sizeof cmd, "vim %s/%s", cwd, 
+							files[file_selection]->ent->d_name);
+						escape_path(cmd, command, true);
+					}
 					run_command(command);
 				}
 				break;

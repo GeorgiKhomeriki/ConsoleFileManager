@@ -9,10 +9,10 @@ int last_index(char* s, char c)
 	return result;
 }
 
-char *escape_path(char *str, char *new_str)
+char *escape_path(char *str, char *new_str, bool skip_first)
 {
 	int i, j;
-	int first = strstr(str, " ") - str;
+	int first = skip_first ? strstr(str, " ") - str : -1;
 	for (i = 0, j = 0; str[i]; i++, j++) {
 		if (i > first && str[i] == ' ')
 			new_str[j++] = '\\';
