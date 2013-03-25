@@ -1,6 +1,7 @@
 #include <ncurses.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <time.h>
 #include <string.h>
 #include "window.h"
@@ -21,6 +22,7 @@ static int _w_files_height;
 static int _max_folders;
 static int _max_files;
 
+void next_dir(char *path, char *new_dir);
 void init_ncurses(void);
 void init_colors(void);
 void init_screen_params(void);

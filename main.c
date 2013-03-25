@@ -73,6 +73,7 @@ int main(void)
 							cwd[0] = '\0';
 						snprintf(cwd, sizeof cwd, "%s/%s", cwd, new_dir);
 					}
+					//next_dir(cwd, new_dir);
 					get_folders_and_files(cwd, folders, files, &num_folders, &num_files);
 					folder_selection = file_selection = 0;
 					offset_folders = offset_files = 0;
@@ -106,6 +107,21 @@ int main(void)
 
 	endwin();
 	return 0;
+}
+
+void next_dir(char *path, char *new_dir)
+{
+	if (!strcmp(new_dir, "..")) {
+		int slash_index = last_index(path, '/');
+		if(!slash_index)
+			snprintf(path, sizeof path, "/");
+		else
+			path[slash_index] = '\0';
+	} else if (strcmp(new_dir, ".")) {
+		if(!strcmp(path, "/"))
+			path[0] = '\0';
+		snprintf(path, sizeof path, "%s/%s", path, new_dir);
+	}
 }
 
 void init_ncurses(void)
@@ -171,16 +187,31 @@ void show_entries(WINDOW *win, int win_type, struct fs_entry **entries, int sele
 
 void show_folder(WINDOW *win, int y, int width, struct fs_entry *folder, bool is_selected)
 {
-	wattron(win, COLOR_PAIR(COLOR_WHITE));
+	int color = folder->can_read ? COLOR_WHITE : COLOR_BLUE;
+	wattron(win, COLOR_PAIR(color));
 	mvwprintw(win, y, 2, "%-*.*s", width, width, folder->ent->d_name);
-	wattroff(win, COLOR_PAIR(COLOR_WHITE));
+	wattroff(win, COLOR_PAIR(color));
 }
 
 void show_file(WINDOW *win, int y, int width, struct fs_entry *file, bool is_selected)
 {
-	int color = file->ent->d_type == DT_REG ? COLOR_WHITE : COLOR_CYAN;
+	int color;
+	if (!file->can_read)
+		color = COLOR_BLUE;
+	else if (file->ent->d_type != DT_REG)
+		color = COLOR_CYAN;
+	else if (file->can_exec)
+		color = COLOR_MAGENTA;
+	else
+		color = COLOR_WHITE;
+	char permissions[4];
+	permissions[0] = file->can_read ? 'r' : ' ';
+	permissions[1] = file->can_write ? 'w' : ' ';
+	permissions[2] = file->can_exec ? 'x' : ' ';
+	permissions[3] = '\0';
 	wattron(win, COLOR_PAIR(color));
-	mvwprintw(win, y, 2, "%-*.*s [%d]", width, width, file->ent->d_name, file->ent->d_type);
+	mvwprintw(win, y, 2, "%-*.*s [%s %d]", width, width, file->ent->d_name,
+			permissions, file->ent->d_type);
 	wattroff(win, COLOR_PAIR(color));
 }
 
