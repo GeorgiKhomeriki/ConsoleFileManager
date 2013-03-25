@@ -29,17 +29,18 @@ void split_entries(struct dirent **entries, char *path, struct fs_entry **folder
 		struct fs_entry *entry = ent->d_type == DT_DIR ?
 			folders[folder_i++] : files[file_i++];
 		entry->ent = ent;
-		set_permissions(entry, path);	
+		populate_entry(entry, path);
 	}
 	folders[folder_i]->ent = files[file_i]->ent = NULL;
 	*num_folders = folder_i;
 	*num_files = file_i;
 }
 
-void set_permissions(struct fs_entry *entry, char *path)
+void populate_entry(struct fs_entry *entry, char *path)
 {
 	char full_path[1024];
 	snprintf(full_path, sizeof full_path, "%s/%s", path, entry->ent->d_name);
+	stat(full_path, entry->stat);
 	entry->can_read = !access(full_path, R_OK);
 	entry->can_write = !access(full_path, W_OK);
 	entry->can_exec = !access(full_path, X_OK);
@@ -48,7 +49,9 @@ void set_permissions(struct fs_entry *entry, char *path)
 void malloc_entries(struct fs_entry **entries, int num_entries)
 {
 	int i;
-	for (i = 0; i < num_entries; i++) 
+	for (i = 0; i < num_entries; i++) {
 		entries[i] = malloc(sizeof(struct fs_entry));
+		entries[i]->stat = malloc(sizeof(struct stat));
+	}
 }
 

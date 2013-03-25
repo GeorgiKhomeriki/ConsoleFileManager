@@ -1,5 +1,5 @@
 #include "util.h"
-	
+
 int last_index(char* s, char c)
 {
 	int i, result = 0;
@@ -19,3 +19,4 @@ char *escape_path(char *str, char *new_str, bool skip_first)
 		new_str[j] = str[i];
 	}
 }
+

@@ -31,6 +31,8 @@ void show_entries(WINDOW *win, int win_type, struct fs_entry **entries, int sele
 		void (*show)(WINDOW *win, int y, int width, struct fs_entry *entry, bool is_selected));
 void show_folder(WINDOW *win, int y, int width, struct fs_entry *entry, bool is_selected);
 void show_file(WINDOW *win, int y, int width, struct fs_entry *file, bool is_selected);
+int get_file_color(struct fs_entry *file);
+void get_permissions(struct fs_entry *entry, char *str);
 void draw_scrollbar(WINDOW *win, int num_entries, int x, int win_height, int offset);
 void move_cursor(WINDOW *win, int curr_window, int *selection, int num_entries, int *offset, int dir);
 void scroll_window(WINDOW *win, int curr_window, int *selection, int *offset, int delta);

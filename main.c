@@ -33,8 +33,10 @@ int main(void)
 				curr_window == FOLDERS, &show_folder);
 		show_entries(w_files, FILES, files, file_selection, offset_files, 
 				curr_window == FILES, &show_file);
-		draw_scrollbar(w_folders, num_folders, _w_folders_width - 2, _w_folders_height - 2, offset_folders);
-		draw_scrollbar(w_files, num_files, _w_files_width - 2, _w_files_height - 2, offset_files);
+		draw_scrollbar(w_folders, num_folders, _w_folders_width - 2,
+				_w_folders_height - 2, offset_folders);
+		draw_scrollbar(w_files, num_files, _w_files_width - 2,
+				_w_files_height - 2, offset_files);
 		draw_title(w_folders, "folders");
 		draw_title(w_files, "files");
 
@@ -177,7 +179,7 @@ void show_entries(WINDOW *win, int win_type, struct fs_entry **entries, int sele
 		void (*show)(WINDOW *win, int y, int width, struct fs_entry *entry, bool is_selected))
 {
 	int max_entries = win_type ? _max_files : _max_folders;
-	int width = win_type ? _w_files_width - 13 : _w_folders_width - 3;
+	int width = win_type ? _w_files_width - 23 : _w_folders_width - 3;
 	int i;
 	for(i = offset; entries[i]->ent != NULL && i - offset < max_entries; i++) {
 		bool is_selected = is_active && i == selection;
@@ -201,24 +203,36 @@ void show_folder(WINDOW *win, int y, int width, struct fs_entry *folder, bool is
 
 void show_file(WINDOW *win, int y, int width, struct fs_entry *file, bool is_selected)
 {
-	int color;
-	if (!file->can_read)
-		color = COLOR_BLUE;
-	else if (file->ent->d_type != DT_REG)
-		color = COLOR_CYAN;
-	else if (file->can_exec)
-		color = COLOR_MAGENTA;
-	else
-		color = COLOR_WHITE;
+	int color = get_file_color(file);
 	char permissions[4];
-	permissions[0] = file->can_read ? 'r' : ' ';
-	permissions[1] = file->can_write ? 'w' : ' ';
-	permissions[2] = file->can_exec ? 'x' : ' ';
-	permissions[3] = '\0';
+	get_permissions(file, permissions);
+	char *name = file->ent->d_name;
+	off_t size = file->stat->st_size;
+	int type = file->ent->d_type;
 	wattron(win, COLOR_PAIR(color));
-	mvwprintw(win, y, 2, "%-*.*s [%s %d]", width, width, file->ent->d_name,
-			permissions, file->ent->d_type);
+	mvwprintw(win, y, 2, "%-*.*s %dkb [%s %d]", width, width, name,
+			size, permissions, type);
 	wattroff(win, COLOR_PAIR(color));
+}
+
+int get_file_color(struct fs_entry *file)
+{
+	if (!file->can_read)
+		return COLOR_BLUE;
+	else if (file->ent->d_type != DT_REG)
+		return COLOR_CYAN;
+	else if (file->can_exec)
+		return COLOR_MAGENTA;
+	else
+		return COLOR_WHITE;
+}
+
+void get_permissions(struct fs_entry *entry, char *str)
+{
+	str[0] = entry->can_read ? 'r' : ' ';
+	str[1] = entry->can_write ? 'w' : ' ';
+	str[2] = entry->can_exec ? 'x' : ' ';
+	str[3] = '\0';
 }
 
 void draw_scrollbar(WINDOW *win, int num_entries, int x, int win_height, int offset)
