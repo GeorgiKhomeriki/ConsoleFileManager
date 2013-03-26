@@ -64,18 +64,7 @@ int main(void)
 			case '\n':
 				if (curr_window == FOLDERS) {
 					char *new_dir = folders[folder_selection]->ent->d_name;
-					if (!strcmp(new_dir, "..")) {
-						int slash_index = last_index(cwd, '/');
-						if(!slash_index)
-							snprintf(cwd, sizeof cwd, "/");
-						else
-							cwd[slash_index] = '\0';
-					} else if (strcmp(new_dir, ".")) {
-						if(!strcmp(cwd, "/"))
-							cwd[0] = '\0';
-						snprintf(cwd, sizeof cwd, "%s/%s", cwd, new_dir);
-					}
-					//next_dir(cwd, new_dir);
+					next_dir(cwd, new_dir, 1024);
 					get_folders_and_files(cwd, folders, files, &num_folders, &num_files);
 					folder_selection = file_selection = 0;
 					offset_folders = offset_files = 0;
@@ -83,6 +72,7 @@ int main(void)
 				} else {
 					char cmd[1024], command[1024];
 					if (files[file_selection]->can_exec) {
+						printw("%d ", sizeof cmd);
 						snprintf(cmd, sizeof cmd, "%s/%s", cwd, 
 							files[file_selection]->ent->d_name);
 						escape_path(cmd, command, false);
@@ -115,21 +105,6 @@ int main(void)
 
 	endwin();
 	return 0;
-}
-
-void next_dir(char *path, char *new_dir)
-{
-	if (!strcmp(new_dir, "..")) {
-		int slash_index = last_index(path, '/');
-		if(!slash_index)
-			snprintf(path, sizeof path, "/");
-		else
-			path[slash_index] = '\0';
-	} else if (strcmp(new_dir, ".")) {
-		if(!strcmp(path, "/"))
-			path[0] = '\0';
-		snprintf(path, sizeof path, "%s/%s", path, new_dir);
-	}
 }
 
 void init_ncurses(void)
@@ -238,9 +213,9 @@ void get_date(struct fs_entry *file, char *str)
 	time_t *f_time = &file->stat->st_mtime;
 	struct tm *time_ptr = localtime(f_time);
 	if(time_ptr->tm_year == curr_year)
-		strftime(str, 128, "%b %d %H:%M", time_ptr);
+		strftime(str, 13, "%b %d %H:%M", time_ptr);
 	else
-		strftime(str, 128, "%b %d  %Y", time_ptr);
+		strftime(str, 13, "%b %d  %Y", time_ptr);
 }
 
 void get_permissions(struct fs_entry *entry, char *str)
