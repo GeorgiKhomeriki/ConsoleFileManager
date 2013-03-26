@@ -159,7 +159,7 @@ void init_screen_params(void)
 {
 	_w_path_width = COLS - 2;
 	_w_folders_width = COLS / 3;
-	_w_folders_height = (LINES - 10)/3;
+	_w_folders_height = LINES - 10;
 	_w_files_width = 2 * COLS / 3 - 2;
 	_w_files_height = _w_folders_height;
 	_max_folders = _w_folders_height - 2;

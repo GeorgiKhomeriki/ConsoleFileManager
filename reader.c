@@ -10,10 +10,10 @@ void get_folders_and_files(char *path, struct fs_entry **folders, struct fs_entr
 void read_entries(char *path, struct dirent **entries)
 {
 	DIR *dir = opendir(path);
-	if(dir != NULL) {
+	if (dir != NULL) {
 		int i;
 		struct dirent *entry;
-		for(i = 0; (entry = readdir(dir)) != NULL; i++)
+		for (i = 0; (entry = readdir(dir)) != NULL; i++)
 			entries[i] = entry;
 		entries[i] = NULL;
 		closedir(dir);
@@ -25,22 +25,31 @@ void split_entries(struct dirent **entries, char *path, struct fs_entry **folder
 	int i, folder_i, file_i;
 	folder_i = file_i = 0;
 	struct dirent *ent;
-	for(i = 0; (ent = entries[i]) != NULL; i++) {
-		struct fs_entry *entry = ent->d_type == DT_DIR ?
-			folders[folder_i++] : files[file_i++];
-		entry->ent = ent;
-		populate_entry(entry, path);
+	for (i = 0; (ent = entries[i]) != NULL; i++) {
+		if (is_sane(ent)) {
+			struct fs_entry *entry = ent->d_type == DT_DIR ?
+				folders[folder_i++] : files[file_i++];
+			entry->ent = ent;
+			populate_entry(entry, path);
+		}
 	}
 	folders[folder_i]->ent = files[file_i]->ent = NULL;
 	*num_folders = folder_i;
 	*num_files = file_i;
 }
 
+bool is_sane(struct dirent *entry)
+{
+	int type = entry->d_type;
+	return type >= 0 && type <= 14 && !(type % 2);
+}
+
 void populate_entry(struct fs_entry *entry, char *path)
 {
 	char full_path[1024];
 	snprintf(full_path, sizeof full_path, "%s/%s", path, entry->ent->d_name);
-	stat(full_path, entry->stat);
+	if (stat(full_path, entry->stat))
+		printw("something went wrong!");
 	entry->can_read = !access(full_path, R_OK);
 	entry->can_write = !access(full_path, W_OK);
 	entry->can_exec = !access(full_path, X_OK);
