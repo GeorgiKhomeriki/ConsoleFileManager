@@ -209,9 +209,12 @@ void show_file(WINDOW *win, int y, int width, struct fs_entry *file, bool is_sel
 	char *name = file->ent->d_name;
 	off_t size = file->stat->st_size;
 	int type = file->ent->d_type;
+	int name_width = width / 3 * 2;
+	char time_str[128];
+	get_date(file, time_str);
 	wattron(win, COLOR_PAIR(color));
-	mvwprintw(win, y, 2, "%-*.*s %dkb [%s %d]", width, width, name,
-			size, permissions, type);
+	mvwprintw(win, y, 2, "%-*.*s %11d %s [%s %2d]", name_width, name_width, name,
+			size, time_str, permissions, type);
 	wattroff(win, COLOR_PAIR(color));
 }
 
@@ -222,9 +225,22 @@ int get_file_color(struct fs_entry *file)
 	else if (file->ent->d_type != DT_REG)
 		return COLOR_CYAN;
 	else if (file->can_exec)
-		return COLOR_MAGENTA;
+		return COLOR_GREEN;
 	else
 		return COLOR_WHITE;
+}
+
+void get_date(struct fs_entry *file, char *str)
+{
+	time_t now;
+	time(&now);
+	int curr_year = localtime(&now)->tm_year;
+	time_t *f_time = &file->stat->st_mtime;
+	struct tm *time_ptr = localtime(f_time);
+	if(time_ptr->tm_year == curr_year)
+		strftime(str, 128, "%b %d %H:%M", time_ptr);
+	else
+		strftime(str, 128, "%b %d  %Y", time_ptr);
 }
 
 void get_permissions(struct fs_entry *entry, char *str)
