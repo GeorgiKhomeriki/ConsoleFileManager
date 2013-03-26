@@ -8,7 +8,8 @@ int main(void)
 	WINDOW *w_path = create_window(1, 1, _w_path_width, 3);
 	WINDOW *w_folders = create_window(1, 4, _w_folders_width, _w_folders_height);
 	WINDOW *w_files = create_window(_w_folders_width + 2, 4, _w_files_width, _w_files_height);
-	WINDOW *windows[] = {w_path, w_folders, w_files, 0};
+	WINDOW *w_hud = create_window(1, _w_folders_height + 4, _w_path_width, 5);
+	WINDOW *windows[] = {w_path, w_folders, w_files, w_hud, 0};
 	
 	char cwd[1024];
 	getcwd(cwd, sizeof(cwd));
@@ -28,7 +29,6 @@ int main(void)
 		clock_t start = clock();
 
 		mvwprintw(w_path, 1, 2, "%s", cwd);
-		
 		show_entries(w_folders, FOLDERS, folders, folder_selection, offset_folders, 
 				curr_window == FOLDERS, &show_folder);
 		show_entries(w_files, FILES, files, file_selection, offset_files, 
@@ -39,6 +39,9 @@ int main(void)
 				_w_files_height - 2, offset_files);
 		draw_title(w_folders, "folders");
 		draw_title(w_files, "files");
+		struct fs_entry *selected_entry = curr_window ? 
+			files[file_selection] : folders[folder_selection];
+		draw_hud(w_hud, selected_entry); 
 
 		switch (input) {
 			case 'j':
@@ -72,7 +75,6 @@ int main(void)
 				} else {
 					char cmd[1024], command[1024];
 					if (files[file_selection]->can_exec) {
-						printw("%d ", sizeof cmd);
 						snprintf(cmd, sizeof cmd, "%s/%s", cwd, 
 							files[file_selection]->ent->d_name);
 						escape_path(cmd, command, false);
@@ -91,17 +93,15 @@ int main(void)
 		wrefresh(w_path);
 		wrefresh(w_folders);
 		wrefresh(w_files);
+		wrefresh(w_hud);
 		refresh();
 		lock_fps(start, 60);
 	}
 
-	clear();
-	wclear(w_path);
-	wclear(w_folders);
-	wclear(w_files);
 	destroy_window(w_path);
 	destroy_window(w_folders);
 	destroy_window(w_files);
+	destroy_window(w_hud);
 
 	endwin();
 	return 0;
@@ -224,6 +224,11 @@ void get_permissions(struct fs_entry *entry, char *str)
 	str[1] = entry->can_write ? 'w' : ' ';
 	str[2] = entry->can_exec ? 'x' : ' ';
 	str[3] = '\0';
+}
+
+void draw_hud(WINDOW *win, struct fs_entry *entry)
+{
+	mvwprintw(win, 1, 2, "%-100.100s", entry->ent->d_name);
 }
 
 void draw_scrollbar(WINDOW *win, int num_entries, int x, int win_height, int offset)
