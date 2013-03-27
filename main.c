@@ -185,11 +185,11 @@ void show_file(WINDOW *win, int y, int width, struct fs_entry *file, bool is_sel
 	off_t size = file->stat->st_size;
 	int type = file->ent->d_type;
 	int name_width = width / 3 * 2;
-	char time_str[128];
-	get_date(file, time_str);
+	char date_str[128];
+	get_date(file, date_str);
 	wattron(win, COLOR_PAIR(color));
 	mvwprintw(win, y, 2, "%-*.*s %11d %s [%s %2d]", name_width, name_width, name,
-			size, time_str, permissions, type);
+			size, date_str, permissions, type);
 	wattroff(win, COLOR_PAIR(color));
 }
 
@@ -228,7 +228,15 @@ void get_permissions(struct fs_entry *entry, char *str)
 
 void draw_hud(WINDOW *win, struct fs_entry *entry)
 {
-	mvwprintw(win, 1, 2, "%-100.100s", entry->ent->d_name);
+	mode_t mode = entry->stat->st_mode;
+	nlink_t nlink = entry->stat->st_nlink;
+	uid_t user_id = entry->stat->st_uid;
+	gid_t group_id = entry->stat->st_gid;
+	off_t size = entry->stat->st_size;
+	char date_str[128];
+	get_date(entry, date_str);
+	mvwprintw(win, 1, 2, "%d %d %d %d %d %s %-100.100s", 
+			mode, nlink, user_id, group_id, size, date_str, entry->ent->d_name);
 }
 
 void draw_scrollbar(WINDOW *win, int num_entries, int x, int win_height, int offset)
