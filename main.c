@@ -73,7 +73,7 @@ int main(void)
 					offset_folders = offset_files = 0;
 					clear_windows(windows);
 				} else {
-					char cmd[1024], command[1024];
+					char cmd[1024] = "", command[1024] = "";
 					if (files[file_selection]->can_exec) {
 						snprintf(cmd, sizeof cmd, "%s/%s", cwd, 
 							files[file_selection]->ent->d_name);
