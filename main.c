@@ -184,7 +184,7 @@ void show_file(WINDOW *win, int y, int width, struct fs_entry *file, bool is_sel
 	char *name = file->ent->d_name;
 	off_t size = file->stat->st_size;
 	int type = file->ent->d_type;
-	int name_width = width / 3 * 2;
+	int name_width = width - 33; //width / 3 * 2;
 	char date_str[128];
 	get_date(file, date_str);
 	wattron(win, COLOR_PAIR(color));
@@ -233,7 +233,7 @@ void draw_hud(WINDOW *win, struct fs_entry *entry)
 	uid_t user_id = entry->stat->st_uid;
 	gid_t group_id = entry->stat->st_gid;
 	off_t size = entry->stat->st_size;
-	char date_str[128];
+	char date_str[128] = "";
 	get_date(entry, date_str);
 	mvwprintw(win, 1, 2, "%d %d %d %d %d %s %-100.100s", 
 			mode, nlink, user_id, group_id, size, date_str, entry->ent->d_name);

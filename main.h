@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <time.h>
 #include <string.h>
+#include <pwd.h>
 #include "window.h"
 #include "reader.h"
 #include "util.h"
