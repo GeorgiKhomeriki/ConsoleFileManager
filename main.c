@@ -2,6 +2,10 @@
 
 int main(void)
 {
+	setlogmask(LOG_UPTO(LOG_NOTICE));
+	openlog("cfm", LOG_PID | LOG_NDELAY, LOG_LOCAL1);
+	syslog(LOG_NOTICE, "Started Console File Manager");
+
 	init_ncurses();
 	init_screen_params();
 
@@ -19,7 +23,7 @@ int main(void)
 	malloc_entries(files, 1024);
 	int num_folders, num_files;
 	get_folders_and_files(cwd, folders, files, &num_folders, &num_files);
-
+	
 	int curr_window = FOLDERS;
 	int selection = 0;
 	int folder_selection = 0, file_selection = 0;
@@ -28,7 +32,7 @@ int main(void)
 	while ((input = getch()) != 'q') {
 		clock_t start = clock();
 
-		mvwprintw(w_path, 1, 2, "%s", cwd);
+		wprint_str(w_path, 2, 1, cwd);
 		show_entries(w_folders, FOLDERS, folders, folder_selection, offset_folders, 
 				curr_window == FOLDERS, &show_folder);
 		show_entries(w_files, FILES, files, file_selection, offset_files, 
@@ -104,6 +108,7 @@ int main(void)
 	destroy_window(w_hud);
 
 	endwin();
+	closelog();
 	return 0;
 }
 
@@ -172,7 +177,9 @@ void show_folder(WINDOW *win, int y, int width, struct fs_entry *folder, bool is
 {
 	int color = folder->can_read ? COLOR_WHITE : COLOR_BLUE;
 	wattron(win, COLOR_PAIR(color));
-	mvwprintw(win, y, 2, "%-*.*s", width, width, folder->ent->d_name);
+	char output[1024] = "";
+	snprintf(output, 1024, "%-*.*s", width, width, folder->ent->d_name);
+        wprint_str(win, 2, y, output);	
 	wattroff(win, COLOR_PAIR(color));
 }
 
@@ -188,8 +195,10 @@ void show_file(WINDOW *win, int y, int width, struct fs_entry *file, bool is_sel
 	char date_str[128];
 	get_date(file, date_str);
 	wattron(win, COLOR_PAIR(color));
-	mvwprintw(win, y, 2, "%-*.*s %11d %s [%s %2d]", name_width, name_width, name,
-			size, date_str, permissions, type);
+	char output[1024] = "";
+	snprintf(output, 1024, "%-*.*s %11d %s [%s %2d]", name_width, name_width, name,
+			(int)size, date_str, permissions, type);
+	wprint_str(win, 2, y, output);
 	wattroff(win, COLOR_PAIR(color));
 }
 
@@ -235,8 +244,10 @@ void draw_hud(WINDOW *win, struct fs_entry *entry)
 	off_t size = entry->stat->st_size;
 	char date_str[128] = "";
 	get_date(entry, date_str);
-	mvwprintw(win, 1, 2, "%d %d %d %d %d %s %-100.100s", 
-			mode, nlink, user_id, group_id, size, date_str, entry->ent->d_name);
+	char output[1024] = "";
+	int n = snprintf(output, 1024, "%d %d %d %d %d %s %-100.100s", 
+			mode, nlink, user_id, group_id, (int)size, date_str, entry->ent->d_name);
+	wprint_str(win, 2, 1, output);
 }
 
 void draw_scrollbar(WINDOW *win, int num_entries, int x, int win_height, int offset)
@@ -249,7 +260,7 @@ void draw_scrollbar(WINDOW *win, int num_entries, int x, int win_height, int off
 		int y;
 		for (y = 1; y <= win_height; y++) {
 			char c = y > sb_offset && y < sb_offset + sb_height ? '#' : ' ';
-			mvwprintw(win, y, x, "%c", c);
+			wprint_chr(win, x, y, c);
 		}
 		wattroff(win, COLOR_PAIR(COLOR_YELLOW));
 	}
@@ -279,3 +290,4 @@ void run_command(char *command)
 	system(command);
 	reset_prog_mode();
 }
+

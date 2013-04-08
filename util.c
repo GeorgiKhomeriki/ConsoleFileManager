@@ -1,5 +1,19 @@
 #include "util.h"
 
+void wprint_chr(WINDOW* win, int x, int y, char c)
+{
+	wmove(win, y, x);
+	waddch(win, c);
+}
+
+void wprint_str(WINDOW* win, int x, int y, char *s)
+{
+	wmove(win, y, x);
+	int i;
+	for (i = 0; s[i]; i++)
+		waddch(win, s[i]);
+}
+
 int last_index(char* s, char c)
 {
 	int i, result = 0;
