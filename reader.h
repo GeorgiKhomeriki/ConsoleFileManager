@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdbool.h>
+#include <syslog.h>
 
 struct fs_entry {
 	struct dirent *ent;

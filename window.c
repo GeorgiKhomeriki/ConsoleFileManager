@@ -38,7 +38,7 @@ void draw_border(WINDOW *win)
 void draw_title(WINDOW *win, char *title)
 {
 	wattron(win, COLOR_PAIR(COLOR_CYAN));
-	mvwprintw(win, 0, 2, title);
+	wprint_str(win, 2, 0, title);
 	wattroff(win, COLOR_PAIR(COLOR_CYAN));
 }
 
