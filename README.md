@@ -2,8 +2,8 @@
 A simple terminal based file manager.
 
 ## Controls
-* j - move up
-* k - move down
+* k - move up
+* j - move down
 * tab - switch pane
 * f/return - perform action
 * q - quit application
