@@ -2,11 +2,11 @@
 A simple terminal based file manager.
 
 ## Controls
-j 	 - move up
-k 	 - move down
-tab	 - switch pane
-j/return - perform action
-q 	 - quit application
+* j 	 - move up
+* k 	 - move down
+* tab	 - switch pane
+* j/return - perform action
+* q 	 - quit application
 
 ## Build
 Run `make` to build the application. 
