@@ -30,22 +30,7 @@ int main(void)
 	int offset_folders = 0, offset_files = 0;
 	int input;
 	while ((input = getch()) != 'q') {
-		clock_t start = clock();
-
-		wprint_str(w_path, 2, 1, cwd);
-		show_entries(w_folders, FOLDERS, folders, folder_selection, offset_folders, 
-				curr_window == FOLDERS, &show_folder);
-		show_entries(w_files, FILES, files, file_selection, offset_files, 
-				curr_window == FILES, &show_file);
-		draw_scrollbar(w_folders, num_folders, _w_folders_width - 2,
-				_w_folders_height - 2, offset_folders);
-		draw_scrollbar(w_files, num_files, _w_files_width - 2,
-				_w_files_height - 2, offset_files);
-		draw_title(w_folders, "folders");
-		draw_title(w_files, "files");
-		struct fs_entry *selected_entry = curr_window ? 
-			files[file_selection] : folders[folder_selection];
-		draw_hud(w_hud, selected_entry); 
+		//clock_t start = clock();
 
 		switch (input) {
 			case 'j':
@@ -93,13 +78,28 @@ int main(void)
 			default:
 				break;
 		}
+
+		wprint_str(w_path, 2, 1, cwd);
+		show_entries(w_folders, FOLDERS, folders, folder_selection, offset_folders, 
+				curr_window == FOLDERS, &show_folder);
+		show_entries(w_files, FILES, files, file_selection, offset_files, 
+				curr_window == FILES, &show_file);
+		draw_scrollbar(w_folders, num_folders, _w_folders_width - 2,
+				_w_folders_height - 2, offset_folders);
+		draw_scrollbar(w_files, num_files, _w_files_width - 2,
+				_w_files_height - 2, offset_files);
+		draw_title(w_folders, "folders");
+		draw_title(w_files, "files");
+		struct fs_entry *selected_entry = curr_window ? 
+			files[file_selection] : folders[folder_selection];
+		draw_hud(w_hud, selected_entry); 
 	
 		wrefresh(w_path);
 		wrefresh(w_folders);
 		wrefresh(w_files);
 		wrefresh(w_hud);
 		refresh();
-		lock_fps(start, 60);
+		//lock_fps(start, 60);
 	}
 
 	destroy_window(w_path);
@@ -118,7 +118,7 @@ void init_ncurses(void)
 	cbreak();
 	noecho();
 	curs_set(0);
-	nodelay(stdscr, TRUE);
+	//nodelay(stdscr, TRUE);
 	refresh();
 	init_colors();
 }

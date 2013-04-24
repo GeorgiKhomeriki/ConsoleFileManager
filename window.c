@@ -18,6 +18,7 @@ void clear_windows(WINDOW **windows)
 void clear_window(WINDOW *win)
 {
 	wclear(win);
+	clearok(win, false);
 	draw_border(win);
 }
 
