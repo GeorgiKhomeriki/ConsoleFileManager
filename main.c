@@ -24,13 +24,15 @@ int main(void)
 	int num_folders, num_files;
 	get_folders_and_files(cwd, folders, files, &num_folders, &num_files);
 	
+	bool first = true;
 	int curr_window = FOLDERS;
 	int selection = 0;
 	int folder_selection = 0, file_selection = 0;
 	int offset_folders = 0, offset_files = 0;
 	int input;
-	while ((input = getch()) != 'q') {
+	while (first || (input = getch()) != 'q') {
 		//clock_t start = clock();
+		first = false;
 
 		switch (input) {
 			case 'j':
