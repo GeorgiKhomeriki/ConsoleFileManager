@@ -31,7 +31,6 @@ int main(void)
 	int offset_folders = 0, offset_files = 0;
 	int input;
 	while (first || (input = getch()) != 'q') {
-		//clock_t start = clock();
 		first = false;
 
 		switch (input) {
@@ -101,7 +100,6 @@ int main(void)
 		wrefresh(w_files);
 		wrefresh(w_hud);
 		refresh();
-		//lock_fps(start, 60);
 	}
 
 	destroy_window(w_path);
@@ -120,7 +118,6 @@ void init_ncurses(void)
 	cbreak();
 	noecho();
 	curs_set(0);
-	//nodelay(stdscr, TRUE);
 	refresh();
 	init_colors();
 }
@@ -146,15 +143,6 @@ void init_screen_params(void)
 	_w_files_height = _w_folders_height;
 	_max_folders = _w_folders_height - 2;
 	_max_files = _w_files_height - 2;
-}
-
-
-void lock_fps(clock_t start, int fps)
-{
-	struct timespec delay;
-	delay.tv_sec = 0;
-	delay.tv_nsec = 1000000000 / fps - (clock() - start) * 1000000000 / CLOCKS_PER_SEC;
-	nanosleep(&delay, NULL);
 }
 
 void show_entries(WINDOW *win, int win_type, struct fs_entry **entries, int selection, int offset, bool is_active, 
