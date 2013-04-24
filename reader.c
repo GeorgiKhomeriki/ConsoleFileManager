@@ -36,6 +36,8 @@ void split_entries(struct dirent **entries, char *path, struct fs_entry **folder
 	folders[folder_i]->ent = files[file_i]->ent = NULL;
 	*num_folders = folder_i;
 	*num_files = file_i;
+	qsort(folders, folder_i, sizeof(folders[0]), compare_entries);
+	qsort(files, file_i, sizeof(struct fs_entry *), compare_entries);
 }
 
 bool is_sane(struct dirent *entry)
@@ -62,5 +64,12 @@ void malloc_entries(struct fs_entry **entries, int num_entries)
 		entries[i] = malloc(sizeof(struct fs_entry));
 		entries[i]->stat = malloc(sizeof(struct stat));
 	}
+}
+
+static int compare_entries(const void *p1, const void *p2)
+{
+	struct fs_entry *e1 = *(struct fs_entry * const *)p1;
+	struct fs_entry *e2 = *(struct fs_entry * const *)p2;
+	return strcmp(e1->ent->d_name, e2->ent->d_name);
 }
 

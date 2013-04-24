@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <dirent.h>
 #include <sys/types.h>
@@ -21,4 +22,5 @@ void split_entries(struct dirent **entries, char *path, struct fs_entry **folder
 bool is_sane(struct dirent *entry);
 void populate_entry(struct fs_entry *entry, char *path);
 void malloc_entries(struct fs_entry **entries, int num_entries);
+static int compare_entries(const void *p1, const void *p2);
 

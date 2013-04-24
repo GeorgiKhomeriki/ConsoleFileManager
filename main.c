@@ -246,7 +246,7 @@ void draw_hud(WINDOW *win, struct fs_entry *entry)
 	get_date(entry, date_str);
 	char output[1024] = "";
 	int n = snprintf(output, 1024, "%d %d %d %d %d %s %-100.100s", 
-			mode, nlink, user_id, group_id, (int)size, date_str, entry->ent->d_name);
+			mode, (int)nlink, user_id, group_id, (int)size, date_str, entry->ent->d_name);
 	wprint_str(win, 2, 1, output);
 }
 
