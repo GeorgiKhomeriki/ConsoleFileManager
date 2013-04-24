@@ -36,7 +36,7 @@ void split_entries(struct dirent **entries, char *path, struct fs_entry **folder
 	folders[folder_i]->ent = files[file_i]->ent = NULL;
 	*num_folders = folder_i;
 	*num_files = file_i;
-	qsort(folders, folder_i, sizeof(folders[0]), compare_entries);
+	qsort(folders, folder_i, sizeof(struct fs_entry *), compare_entries);
 	qsort(files, file_i, sizeof(struct fs_entry *), compare_entries);
 }
 
