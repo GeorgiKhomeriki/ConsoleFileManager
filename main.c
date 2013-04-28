@@ -57,7 +57,7 @@ int main(void)
 			case '\n':
 				if (curr_window == FOLDERS) {
 					char *new_dir = folders[folder_selection]->ent->d_name;
-					next_dir(cwd, new_dir, 1024);
+					next_dir(cwd, new_dir);
 					get_folders_and_files(cwd, folders, files, &num_folders, &num_files);
 					folder_selection = file_selection = 0;
 					offset_folders = offset_files = 0;
@@ -65,11 +65,11 @@ int main(void)
 				} else {
 					char cmd[1024] = "", command[1024] = "";
 					if (files[file_selection]->can_exec) {
-						snprintf(cmd, sizeof cmd, "%s/%s", cwd, 
+						sprintf(cmd, "%s/%s", cwd, 
 							files[file_selection]->ent->d_name);
 						escape_path(cmd, command, false);
 					} else {
-						snprintf(cmd, sizeof cmd, "vim %s/%s", cwd, 
+						sprintf(cmd, "vim %s/%s", cwd, 
 							files[file_selection]->ent->d_name);
 						escape_path(cmd, command, true);
 					}
@@ -168,7 +168,7 @@ void show_folder(WINDOW *win, int y, int width, struct fs_entry *folder, bool is
 	int color = folder->can_read ? COLOR_WHITE : COLOR_BLUE;
 	wattron(win, COLOR_PAIR(color));
 	char output[1024] = "";
-	snprintf(output, 1024, "%-*.*s", width, width, folder->ent->d_name);
+	sprintf(output, "%-*.*s", width, width, folder->ent->d_name);
         wprint_str(win, 2, y, output);	
 	wattroff(win, COLOR_PAIR(color));
 }
@@ -186,7 +186,7 @@ void show_file(WINDOW *win, int y, int width, struct fs_entry *file, bool is_sel
 	get_date(file, date_str);
 	wattron(win, COLOR_PAIR(color));
 	char output[1024] = "";
-	snprintf(output, 1024, "%-*.*s %11d %s [%s %2d]", name_width, name_width, name,
+	sprintf(output, "%-*.*s %11d %s [%s %2d]", name_width, name_width, name,
 			(int)size, date_str, permissions, type);
 	wprint_str(win, 2, y, output);
 	wattroff(win, COLOR_PAIR(color));
@@ -235,7 +235,7 @@ void draw_hud(WINDOW *win, struct fs_entry *entry)
 	char date_str[128] = "";
 	get_date(entry, date_str);
 	char output[1024] = "";
-	int n = snprintf(output, 1024, "%d %d %d %d %d %s %-100.100s", 
+	int n = sprintf(output, "%d %d %d %d %d %s %-100.100s", 
 			mode, (int)nlink, user_id, group_id, (int)size, date_str, entry->ent->d_name);
 	wprint_str(win, 2, 1, output);
 }

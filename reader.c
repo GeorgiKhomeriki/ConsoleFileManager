@@ -49,7 +49,7 @@ bool is_sane(struct dirent *entry)
 void populate_entry(struct fs_entry *entry, char *path)
 {
 	char full_path[1024];
-	snprintf(full_path, sizeof full_path, "%s/%s", path, entry->ent->d_name);
+	sprintf(full_path, "%s/%s", path, entry->ent->d_name);
 	if (stat(full_path, entry->stat))
 		syslog(LOG_NOTICE, "error: %s ", full_path);
 	entry->can_read = !access(full_path, R_OK);

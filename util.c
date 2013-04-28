@@ -34,18 +34,18 @@ char *escape_path(char *str, char *new_str, bool skip_first)
 	}
 }
 
-void next_dir(char *path, char *new_dir, int str_len)
+void next_dir(char *path, char *new_dir)
 {
 	if (!strcmp(new_dir, "..")) {
 		int slash_index = last_index(path, '/');
 		if(!slash_index)
-			snprintf(path, str_len, "/");
+			sprintf(path, "/");
 		else
 			path[slash_index] = '\0';
 	} else if (strcmp(new_dir, ".")) {
 		if(!strcmp(path, "/"))
 			path[0] = '\0';
-		snprintf(path, str_len, "%s/%s", path, new_dir);
+		sprintf(path, "%s/%s", path, new_dir);
 	}
 }
 
