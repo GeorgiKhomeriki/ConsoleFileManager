@@ -69,7 +69,7 @@ int main(void)
 							files[file_selection]->ent->d_name);
 						escape_path(cmd, command, false);
 					} else {
-						sprintf(cmd, "vim %s/%s", cwd, 
+						sprintf(cmd, "$EDITOR %s/%s", cwd, 
 							files[file_selection]->ent->d_name);
 						escape_path(cmd, command, true);
 					}
