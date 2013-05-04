@@ -230,13 +230,14 @@ void draw_hud(WINDOW *win, struct fs_entry *entry)
 	mode_t mode = entry->stat->st_mode;
 	nlink_t nlink = entry->stat->st_nlink;
 	uid_t user_id = entry->stat->st_uid;
+	struct passwd *user = getpwuid(user_id);
 	gid_t group_id = entry->stat->st_gid;
 	off_t size = entry->stat->st_size;
 	char date_str[128] = "";
 	get_date(entry, date_str);
 	char output[1024] = "";
-	int n = sprintf(output, "%d %d %d %d %d %s %-100.100s", 
-			mode, (int)nlink, user_id, group_id, (int)size, date_str, entry->ent->d_name);
+	int n = sprintf(output, "%d %d %s %d %d %s %-100.100s", 
+			mode, (int)nlink, user->pw_name, group_id, (int)size, date_str, entry->ent->d_name);
 	wprint_str(win, 2, 1, output);
 }
 
